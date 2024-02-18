@@ -9,10 +9,10 @@ import (
 
 var ErrInvalidString = errors.New("invalid string")
 var ErrParse = errors.New("invalid parse digit")
-var next_number bool
-var str_slice []string
 
 func Unpack(s string) (string, error) {
+	var next_number bool
+	var str_slice []string
 
 	for i, v := range []rune(s) {
 		if i < len(s)-1 {
