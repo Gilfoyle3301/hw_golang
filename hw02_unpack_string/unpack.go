@@ -13,7 +13,6 @@ var ErrParse = errors.New("invalid parse digit")
 func Unpack(s string) (string, error) {
 	var nextNumber bool
 	var strSlice []string
-
 	for i, v := range []rune(s) {
 		if i < len(s)-1 {
 			nextNumber = !unicode.IsDigit(rune(s[i+1]))
