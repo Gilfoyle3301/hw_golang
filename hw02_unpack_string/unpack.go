@@ -3,42 +3,47 @@ package hw02unpackstring
 import (
 	"errors"
 	"strconv"
-	"strings"
 	"unicode"
 )
 
-var (
-	ErrInvalidString = errors.New("invalid string")
-	ErrParse         = errors.New("invalid parse digit")
-)
+var ErrInvalidString = errors.New("invalid string")
 
 func Unpack(s string) (string, error) {
-	var (
-		nextNumber bool
-		strSlice   []string
-	)
-	for i, v := range []rune(s) {
-		if i < len(s)-1 {
-			nextNumber = !unicode.IsDigit(rune(s[i+1]))
-		}
+	var s_builder string
+	var s_slice []rune = []rune(s)
+	var slh bool
+	for i, v := range s_slice {
 		switch {
-		case unicode.IsLetter(v):
-			strSlice = append(strSlice, string(v))
-		case unicode.IsSpace(v):
-			strSlice = append(strSlice, strings.Trim(strconv.QuoteRune(v), "'"))
-		case unicode.IsDigit(v) && i != 0 && nextNumber:
+		case i == 0 && unicode.IsDigit(v):
+			return "", ErrInvalidString
+		case unicode.IsDigit(v) && unicode.IsDigit(s_slice[i-1]):
+			return "", ErrInvalidString
+		case v == '\\':
+			s_builder += string(v)
+			slh = true
+			continue
+		case unicode.IsDigit(v):
 			digit, err := strconv.Atoi(string(v))
 			if err != nil {
-				return "", ErrParse
+				return "", ErrInvalidString
 			}
 			if digit == 0 {
-				strSlice = strSlice[:len(strSlice)-1]
-			} else {
-				strSlice = append(strSlice, strings.Repeat(strSlice[i-1], digit-1))
+				s_builder = s_builder[:len(s_builder)-1]
+				continue
 			}
-		default:
-			return "", ErrInvalidString
+			if slh {
+				digit = digit*2 - 1
+			}
+			for j := 0; j < digit-1; j++ {
+				if slh {
+					s_builder += string(s_builder[len(s_builder)-2])
+					continue
+				}
+				s_builder += string(s_slice[i-1])
+			}
+			continue
 		}
+		s_builder += string(v)
 	}
-	return strings.Join(strSlice, ""), nil
+	return s_builder, nil
 }
