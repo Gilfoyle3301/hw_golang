@@ -2,48 +2,45 @@ package hw02unpackstring
 
 import (
 	"errors"
-	"strconv"
 	"unicode"
 )
 
 var ErrInvalidString = errors.New("invalid string")
 
 func Unpack(s string) (string, error) {
-	var s_builder string
-	var s_slice []rune = []rune(s)
-	var slh bool
-	for i, v := range s_slice {
+	var (
+		sBuilder string
+		isSlash  bool
+	)
+	for i, v := range []rune(s) {
 		switch {
 		case i == 0 && unicode.IsDigit(v):
 			return "", ErrInvalidString
-		case unicode.IsDigit(v) && unicode.IsDigit(s_slice[i-1]):
+		case unicode.IsDigit(v) && unicode.IsDigit([]rune(s)[i-1]):
 			return "", ErrInvalidString
 		case v == '\\':
-			s_builder += string(v)
-			slh = true
+			sBuilder += string(v)
+			isSlash = true
 			continue
 		case unicode.IsDigit(v):
-			digit, err := strconv.Atoi(string(v))
-			if err != nil {
-				return "", ErrInvalidString
-			}
+			digit := int(v - '0')
 			if digit == 0 {
-				s_builder = s_builder[:len(s_builder)-1]
+				sBuilder = sBuilder[:len(sBuilder)-1]
 				continue
 			}
-			if slh {
+			if isSlash {
 				digit = digit*2 - 1
 			}
 			for j := 0; j < digit-1; j++ {
-				if slh {
-					s_builder += string(s_builder[len(s_builder)-2])
+				if isSlash {
+					sBuilder += string(sBuilder[len(sBuilder)-2])
 					continue
 				}
-				s_builder += string(s_slice[i-1])
+				sBuilder += string([]rune(s)[i-1])
 			}
 			continue
 		}
-		s_builder += string(v)
+		sBuilder += string(v)
 	}
-	return s_builder, nil
+	return sBuilder, nil
 }
