@@ -12,14 +12,14 @@ type resultSlice struct {
 
 func Top10(s string) []string {
 	var (
-		rSlice  []resultSlice
-		result  []string
-		forSort map[string]uint = make(map[string]uint, len(s))
-		counts  uint            = 0
+		rSlice  = make([]resultSlice, 0, len(strings.Fields(s)))
+		result  = make([]string, 0, 10)
+		forSort = make(map[string]uint, 0)
+		counts  uint
 	)
 	for _, v := range strings.Fields(s) {
 		if _, ok := forSort[v]; ok {
-			forSort[v] = forSort[v] + 1
+			forSort[v]++
 			continue
 		}
 		forSort[v] = counts + 1
@@ -36,7 +36,7 @@ func Top10(s string) []string {
 	})
 	for i, v := range rSlice {
 		if i < 10 {
-			result = append(result, v.words)
+			result[i] = v.words
 		}
 	}
 	return result
