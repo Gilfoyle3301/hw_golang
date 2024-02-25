@@ -36,7 +36,7 @@ func Top10(s string) []string {
 	})
 	for i, v := range rSlice {
 		if i < 10 {
-			result[i] = v.words
+			result = append(result, v.words)
 		}
 	}
 	return result
