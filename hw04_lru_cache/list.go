@@ -85,8 +85,8 @@ func (l *list) Remove(i *ListItem) {
 		l.endElement.Next = nil
 		l.lenght--
 	default:
-		i.Prev.Next = i.Prev
-		i.Next.Prev = i.Next
+		i.Prev.Next = i.Next
+		i.Next.Prev = i.Prev
 		l.lenght--
 	}
 }
