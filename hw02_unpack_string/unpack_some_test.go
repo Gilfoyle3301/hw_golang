@@ -26,7 +26,6 @@ func TestSomeChar(t *testing.T) {
 				require.Error(t, err, "can't unpack string")
 			}
 			require.Equal(t, tc.expected, unpackString)
-
 		})
 	}
 }
