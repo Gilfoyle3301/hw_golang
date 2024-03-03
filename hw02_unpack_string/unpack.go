@@ -25,7 +25,7 @@ func Unpack(s string) (string, error) {
 		case unicode.IsDigit(v):
 			digit := int(v - '0')
 			if digit == 0 {
-				sBuilder = sBuilder[:len(sBuilder)-1]
+				sBuilder = string([]rune(sBuilder)[:len([]rune(sBuilder))-1])
 				continue
 			}
 			if isSlash {
