@@ -24,7 +24,6 @@ func (l *lruCache) Set(key Key, value interface{}) bool {
 	if l.capacity == l.queue.Len() {
 		l.queue.Remove(l.queue.Back())
 		delete(l.items, l.getKey(l.queue.Back()))
-
 	}
 	l.items[key] = l.queue.PushFront(value)
 	return false
@@ -54,9 +53,8 @@ func NewCache(capacity int) Cache {
 func (l *lruCache) getKey(value *ListItem) Key {
 	for key := range l.items {
 		if value == l.items[key] {
-			return Key(key)
+			return key
 		}
 	}
-	return Key("")
-
+	return ""
 }

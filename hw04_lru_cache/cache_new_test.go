@@ -2,6 +2,7 @@ package hw04lrucache
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,15 +24,11 @@ func TestNewCache(t *testing.T) {
 		emptyGet, ok := cache.Get("")
 		require.Empty(t, emptyGet)
 		require.False(t, ok)
-
 		cache.Set("one", 111)
 		cache.Set("two", 222)
-
 		varGet, ok := cache.Get("one")
-
 		require.Equal(t, 111, varGet)
 		require.True(t, ok)
-
 	})
 
 	t.Run("purge logic", func(t *testing.T) {
@@ -46,8 +43,8 @@ func TestNewCache(t *testing.T) {
 			{key: "fourEl", value: 542},
 		}
 
-		for _, case_do := range testCase {
-			cache.Set(Key(case_do.key), case_do.value)
+		for _, caseDo := range testCase {
+			cache.Set(Key(caseDo.key), caseDo.value)
 		}
 		valueGet, inCache := cache.Get("twoEl")
 		require.False(t, inCache)

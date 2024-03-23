@@ -7,7 +7,7 @@ import (
 )
 
 func TestListWords(t *testing.T) {
-	t.Run("lenght list", func(t *testing.T) {
+	t.Run("length list", func(t *testing.T) {
 		list := NewList()
 		require.Equal(t, 0, list.Len())
 	})
@@ -36,6 +36,5 @@ func TestListWords(t *testing.T) {
 		}
 
 		require.Equal(t, []string{"pop", "socks", "yakumi", "future", "one", "back"}, wordsList)
-
 	})
 }
