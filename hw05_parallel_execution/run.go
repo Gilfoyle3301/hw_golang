@@ -33,7 +33,6 @@ func Run(tasks []Task, n, m int) error {
 			}
 			wg.Done()
 		}()
-
 	}
 	for _, task := range tasks {
 		if atomic.LoadInt64(&currentErr) >= int64(m) {
