@@ -15,14 +15,9 @@ func Top10(s string) []string {
 		rSlice  = make([]resultSlice, 0, len(strings.Fields(s)))
 		result  = make([]string, 0, 10)
 		forSort = make(map[string]uint, 0)
-		counts  uint
 	)
 	for _, v := range strings.Fields(s) {
-		if _, ok := forSort[v]; ok {
-			forSort[v]++
-			continue
-		}
-		forSort[v] = counts + 1
+		forSort[v]++
 	}
 
 	for k, v := range forSort {
@@ -35,9 +30,10 @@ func Top10(s string) []string {
 		return rSlice[i].count > rSlice[j].count
 	})
 	for i, v := range rSlice {
-		if i < 10 {
-			result = append(result, v.words)
+		if i >= 10 {
+			break
 		}
+		result = append(result, v.words)
 	}
 	return result
 }
