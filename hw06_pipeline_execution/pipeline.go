@@ -8,24 +8,31 @@ type (
 )
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
-	for _, stage := range stages {
-		in = Worker(done, stage(in))
+	for i := 0; i < len(stages); i++ {
+		in = Worker(done, stages[i](in))
 	}
 	return in
 }
 
-func Worker(done In, in In) Bi {
-	out := make(Bi)
+func Worker(done In, out Out) Bi {
+	localOut := make(Bi)
+
 	go func() {
-		defer close(out)
-		for element := range in {
+		defer close(localOut)
+	loop:
+		for {
 			select {
+			case value, ok := <-out:
+				if ok {
+					localOut <- value
+				} else {
+					break loop
+				}
 			case <-done:
 				return
-			default:
-				out <- element
 			}
 		}
 	}()
-	return out
+
+	return localOut
 }
