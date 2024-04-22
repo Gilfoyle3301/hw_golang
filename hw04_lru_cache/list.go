@@ -21,13 +21,13 @@ func NewList() List {
 }
 
 type list struct {
-	lenght       int
+	length       int
 	beginElement *ListItem
 	endElement   *ListItem
 }
 
 func (l *list) Len() int {
-	return l.lenght
+	return l.length
 }
 
 func (l *list) Front() *ListItem {
@@ -44,14 +44,14 @@ func (l *list) PushFront(v interface{}) *ListItem {
 	if l.Len() == 0 {
 		l.beginElement = mod
 		l.endElement = mod
-		l.lenght++
+		l.length++
 		return l.beginElement
 	}
 
 	if l.Len() != 0 {
 		l.beginElement.Prev = mod
 		l.beginElement = mod
-		l.lenght++
+		l.length++
 	}
 	return l.beginElement
 }
@@ -62,14 +62,14 @@ func (l *list) PushBack(v interface{}) *ListItem {
 	if l.Len() == 0 {
 		l.beginElement = mod
 		l.endElement = mod
-		l.lenght++
+		l.length++
 		return l.endElement
 	}
 
 	if l.Len() != 0 {
 		l.endElement.Next = mod
 		l.endElement = mod
-		l.lenght++
+		l.length++
 	}
 	return l.endElement
 }
@@ -79,17 +79,18 @@ func (l *list) Remove(i *ListItem) {
 	case i.Prev == nil:
 		l.beginElement = l.beginElement.Next
 		l.beginElement.Prev = nil
-		l.lenght--
+		l.length--
 	case i.Next == nil:
 		l.endElement = l.endElement.Prev
 		l.endElement.Next = nil
-		l.lenght--
+		l.length--
 	default:
-		i.Prev.Next = i.Prev
-		i.Next.Prev = i.Next
-		l.lenght--
+		i.Prev.Next = i.Next
+		i.Next.Prev = i.Prev
+		l.length--
 	}
 }
+
 func (l *list) MoveToFront(i *ListItem) {
 	switch {
 	case i.Prev == nil:
@@ -104,5 +105,4 @@ func (l *list) MoveToFront(i *ListItem) {
 	i.Next = l.beginElement
 	i.Prev = nil
 	l.beginElement = i
-
 }
