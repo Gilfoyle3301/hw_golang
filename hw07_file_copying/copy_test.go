@@ -40,7 +40,7 @@ type *PathError, which may be unpacked for more information`),
 type *PathError, which may be unpacked for more information`),
 		},
 	}
-	err := os.WriteFile(fileName, []byte(testDataSet), 0644)
+	err := os.WriteFile(fileName, []byte(testDataSet), 0o644)
 	require.NoError(t, err)
 	for _, tc := range caseOffsetLimits {
 		tc := tc
