@@ -1,6 +1,7 @@
 package hw06pipelineexecution
 
 import (
+	"encoding/hex"
 	"strconv"
 	"testing"
 	"time"
@@ -89,5 +90,50 @@ func TestPipeline(t *testing.T) {
 
 		require.Len(t, result, 0)
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
+	})
+}
+
+func TestOtherPipeline(t *testing.T) {
+	g := func(f func(v interface{}) interface{}) Stage {
+		return func(in In) Out {
+			out := make(Bi)
+			go func() {
+				defer close(out)
+				for v := range in {
+					time.Sleep(sleepPerStage)
+					out <- f(v)
+				}
+			}()
+			return out
+		}
+	}
+
+	stages := []Stage{
+		g(func(v interface{}) interface{} { return v.(int) * 25 }),
+		g(func(v interface{}) interface{} { return v.(int) - 100 }),
+		g(func(v interface{}) interface{} { return strconv.Itoa(v.(int)) }),
+		g(func(v interface{}) interface{} { return hex.EncodeToString([]byte(v.(string))) }),
+	}
+	t.Run("other case", func(t *testing.T) {
+		in := make(Bi)
+		data := []int{100, 2087, 30, 40, 50}
+
+		go func() {
+			for _, i := range data {
+				in <- i
+			}
+			close(in)
+		}()
+
+		result := make([]string, 0, 10)
+		start := time.Now()
+		for s := range ExecutePipeline(in, nil, stages...) {
+			result = append(result, s.(string))
+		}
+		elapsed := time.Since(start)
+		require.Equal(t, []string{"32343030", "3532303735", "363530", "393030", "31313530"}, result)
+		require.Less(t,
+			int64(elapsed),
+			int64(sleepPerStage)*int64(len(stages)+len(data)-1)+int64(fault))
 	})
 }

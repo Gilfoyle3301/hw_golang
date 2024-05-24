@@ -1,6 +1,6 @@
 module github.com/Gilfoyle3301/hw_golang/hw05_parallel_execution
 
-go 1.19
+go 1.22
 
 require (
 	github.com/stretchr/testify v1.7.0
