@@ -151,6 +151,7 @@ func TestValidate(t *testing.T) {
 				t.Errorf("unexpected error: got %v, expected %v", err, tt.expectedErr)
 			} else {
 				require.Equal(t, tt.expectedErr, err)
+				// fmt.Println(err)
 			}
 		})
 	}
