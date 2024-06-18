@@ -9,12 +9,33 @@ import (
 	"strings"
 )
 
+type User1 struct {
+	ID     string   `json:"id" validate:"len:36"`
+	Age    int      `validate:"min:18|max:50"`
+	Email  string   `validate:"regexp:^\\w+@\\w+\\.\\w+$"`
+	Phones []string `validate:"len:11"`
+	Some   []int    `validate:"in:15"`
+}
+
 type ValidationError struct {
 	Field string
 	Err   error
 }
 
 type ValidationErrors []ValidationError
+
+var hashType = map[reflect.Kind]bool{
+	reflect.Int:    true,
+	reflect.Int8:   true,
+	reflect.Int16:  true,
+	reflect.Int32:  true,
+	reflect.Int64:  true,
+	reflect.Uint:   true,
+	reflect.Uint8:  true,
+	reflect.Uint16: true,
+	reflect.Uint32: true,
+	reflect.Uint64: true,
+}
 
 func (v ValidationErrors) Error() string {
 	msgErr := make([]string, 0, len(v))
@@ -38,7 +59,7 @@ func Validate(v interface{}) error {
 			if len(alias) == 0 {
 				continue
 			}
-			validateField(
+			RunValidateField(
 				&errSlice,
 				strings.Fields(alias),
 				dataType.Field(i).Name,
@@ -52,22 +73,43 @@ func Validate(v interface{}) error {
 	return nil
 }
 
-func validateField(errSlice *ValidationErrors, tags []string, fieldName string, value reflect.Value) {
+func RunValidateField(errSlice *ValidationErrors, tags []string, fieldName string, value reflect.Value) {
 	tagData := strings.Split(tags[0], "|")
-	for idx, tag := range tagData {
-		fmt.Println(tag)
-		switch strings.Split(tag, ":")[idx] {
-		case "regexp":
-			validateRegexp(errSlice, fieldName, tag, value)
-		case "len":
-			validateLengh(errSlice, fieldName, tag, value)
-		case "in":
-			validateIn(errSlice, fieldName, tag, value)
-		case "max":
-			validateMax(errSlice, fieldName, tag, value)
-		case "min":
-			validateMin(errSlice, fieldName, tag, value)
+	valid := func(tag string, value reflect.Value) {
+		validateField(
+			errSlice,
+			tag,
+			fieldName,
+			value,
+		)
+	}
+	for _, tag := range tagData {
+		if value.Kind() == reflect.Slice {
+			if typeEl := value.Type().Elem(); hashType[typeEl.Kind()] {
+				valid(tag, value)
+			} else {
+				for j := 0; j < value.Len(); j++ {
+					valid(tag, value.Index(j))
+				}
+			}
+		} else {
+			valid(tag, value)
 		}
+	}
+}
+
+func validateField(errSlice *ValidationErrors, tag string, fieldName string, value reflect.Value) {
+	switch strings.Split(tag, ":")[0] {
+	case "regexp":
+		validateRegexp(errSlice, fieldName, tag, value)
+	case "len":
+		validateLengh(errSlice, fieldName, tag, value)
+	case "in":
+		validateIn(errSlice, fieldName, tag, value)
+	case "max":
+		validateMax(errSlice, fieldName, tag, value)
+	case "min":
+		validateMin(errSlice, fieldName, tag, value)
 	}
 }
 
