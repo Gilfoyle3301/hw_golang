@@ -1,0 +1,10 @@
+logger:
+    level: "INFO"
+server:
+    port: :8080
+database:
+    user: "calendar"
+    password: "password"
+    host: "postgres"
+    port: 5432
+    name: calendar"

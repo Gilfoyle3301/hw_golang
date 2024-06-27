@@ -1,20 +1,32 @@
 package logger
 
-import "fmt"
+import (
+	"log/slog"
+	"os"
+)
 
-type Logger struct { // TODO
+type Logger struct {
+	newLoggerObject *slog.Logger
 }
 
-func New(level string) *Logger {
-	return &Logger{}
+func NewLogger() *Logger {
+	newLoggerObject := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	return &Logger{newLoggerObject}
 }
 
 func (l Logger) Info(msg string) {
-	fmt.Println(msg)
+	l.newLoggerObject.Info(msg)
 }
 
 func (l Logger) Error(msg string) {
-	// TODO
+	l.newLoggerObject = slog.New(slog.NewJSONHandler(os.Stderr, nil))
+	l.newLoggerObject.Error(msg)
 }
 
-// TODO
+func (l Logger) Warn(msg string) {
+	l.newLoggerObject.Warn(msg)
+}
+
+func (l Logger) Debug(msg string) {
+	l.newLoggerObject.Debug(msg)
+}
