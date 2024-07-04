@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 
+	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
 	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage"
 )
 
@@ -23,7 +24,10 @@ type Storage interface {
 	ListEvents() (*[]storage.Event, error)
 }
 
-func New(logger Logger, storage Storage) *App {
+// handler := &NewHandler{}
+// http.HandleFunc("/", handler.helloHandler)
+
+func New(logger logger.Logger, storage Storage) *App {
 	return &App{}
 }
 
