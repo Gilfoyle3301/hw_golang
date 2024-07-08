@@ -3,8 +3,8 @@ package memorystorage
 import (
 	"sync"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage"
+	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/logger"
+	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Storage struct {

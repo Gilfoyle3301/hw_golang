@@ -3,8 +3,8 @@ package memorystorage
 import (
 	"testing"
 
+	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/storage"
 	"github.com/bxcodec/faker"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -16,7 +16,7 @@ func TestMemStorage(t *testing.T) {
 	suite.Run(t, new(MemStoreTest))
 }
 
-func (s *MemStoreTest) TestAddAndListEvent() { 
+func (s *MemStoreTest) TestAddAndListEvent() {
 	memStorage := New()
 	for i := 0; i < 300; i++ {
 		newEvent := storage.Event{}

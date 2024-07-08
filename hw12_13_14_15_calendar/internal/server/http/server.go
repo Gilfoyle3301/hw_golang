@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
+	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/app"
 )
 
 type Server struct {

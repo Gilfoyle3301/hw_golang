@@ -9,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/app"
+	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/storage/memory"
 )
 
 var configFile string
@@ -33,7 +33,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logg := logger.New(config.Logger.Level)
+	logg := logger.NewLogger()
 
 	storage := memorystorage.New()
 	calendar := app.New(logg, storage)
