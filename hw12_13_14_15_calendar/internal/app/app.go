@@ -28,7 +28,7 @@ func New(logger logger.Logger, storage Storage) *App {
 	}
 }
 
-func (a *App) Index() map[string]string {
+func (a *App) Index(_ context.Context) map[string]string {
 	return map[string]string{"message": "hello world"}
 }
 
