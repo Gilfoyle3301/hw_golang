@@ -1,17 +1,19 @@
+//nolint:depguard
 package main
 
 import (
 	"context"
 	"flag"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/app"
+	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/storage/memory"
 )
 
 var configFile string
@@ -28,16 +30,31 @@ func main() {
 		return
 	}
 
-	config := NewConfig()
-	logg := logger.New(config.Logger.Level)
+	config, err := NewConfig(configFile)
+	if err != nil {
+		log.Fatalf("can't get config: %v", err)
+	}
 
-	storage := memorystorage.New()
-	calendar := app.New(logg, storage)
+	logg, err := logger.New(config.Logger.Level, config.Logger.Path)
+	if err != nil {
+		log.Fatalf("can't start logger: %v", err)
+	}
 
-	server := internalhttp.NewServer(logg, calendar)
+	application := app.New(*logg, memorystorage.New(logg))
 
-	ctx, cancel := signal.NotifyContext(context.Background(),
-		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	server := internalhttp.NewServer(
+		*logg,
+		config.Server.Port,
+		*internalhttp.NewHandler(
+			*logg,
+			application,
+		),
+	)
+
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP,
+	)
 	defer cancel()
 
 	go func() {
@@ -50,8 +67,6 @@ func main() {
 			logg.Error("failed to stop http server: " + err.Error())
 		}
 	}()
-
-	logg.Info("calendar is running...")
 
 	if err := server.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())
