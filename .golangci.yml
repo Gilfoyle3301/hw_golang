@@ -44,13 +44,13 @@ linters:
     - gosec
     - gosimple
     - govet
-    # - importas
+    - importas
     - ineffassign
     - lll
     - makezero
     - misspell
     - nestif
-    # - nilerr
+    - nilerr
     - noctx
     - nolintlint
     - prealloc
@@ -58,14 +58,10 @@ linters:
     - revive
     - staticcheck
     - stylecheck
-    # - tagliatelle
+    - tagliatelle
     - thelper
     - typecheck
     - unconvert
     - unparam
     - unused
     - whitespace
-  disable:
-    - importas
-    - nilerr
-    - tagliatelle
