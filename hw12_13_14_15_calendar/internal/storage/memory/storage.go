@@ -1,73 +1,79 @@
 package memorystorage
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"sync"
 
-	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/logger"
 	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Storage struct {
 	mu     sync.RWMutex
-	event  map[string]*storage.Event
-	logger *logger.Logger
+	events map[string]*storage.Event
+	logger Logger
 }
 
-func New() *Storage {
+type Logger interface {
+	Info(msg string)
+	Error(msg string)
+	Warn(msg string)
+	Debug(msg string)
+}
+
+func New(logger Logger) *Storage {
 	return &Storage{
-		event:  make(map[string]*storage.Event),
-		logger: logger.NewLogger(),
-		mu:     sync.RWMutex{},
+		events: make(map[string]*storage.Event),
+		logger: logger,
 	}
 }
 
-func (s *Storage) AddEvent(event storage.Event) error {
+func (s *Storage) CreateEvent(_ context.Context, e storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.event[event.ID] != nil {
-		s.logger.Warn("an event with this ID already exists")
-	} else {
-		s.logger.Info("event added succsseful")
+
+	if s.events[e.ID] != nil {
+		return errors.New("event already exist")
 	}
-	s.event[event.ID] = &event
+
+	s.events[e.ID] = &e
 	return nil
 }
 
-func (s *Storage) UpdateEvent(event storage.Event) error {
+func (s *Storage) UpdateEvent(_ context.Context, e storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.event[event.ID] == nil {
-		s.logger.Error("event not found")
-	} else {
-		s.logger.Info("event update succsseful")
+
+	if s.events[e.ID] == nil {
+		s.logger.Info(fmt.Sprintf("event %v not found", e.ID))
+		return errors.New("event not found")
 	}
+
+	s.events[e.ID] = &e
 	return nil
 }
 
-func (s *Storage) DeleteEvent(event storage.Event) error {
+func (s *Storage) DeleteEvent(_ context.Context, e storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.event[event.ID] == nil {
-		s.logger.Error("event not found")
-	} else {
-		s.logger.Info("event deleted succsseful")
+
+	if s.events[e.ID] == nil {
+		s.logger.Info(fmt.Sprintf("event %v not found", e.ID))
+		return errors.New("event not found")
 	}
-	delete(s.event, event.ID)
+
+	delete(s.events, e.ID)
 	return nil
 }
 
-func (s *Storage) ListEvents() ([]storage.Event, error) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	if len(s.event) != 0 {
-		result := make([]storage.Event, 0, len(s.event))
-		for _, v := range s.event {
-			result = append(result, *v)
-		}
+func (s *Storage) GetEvents(_ context.Context) ([]storage.Event, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
-		return result, nil
+	events := make([]storage.Event, 0, len(s.events))
+	for _, event := range s.events {
+		events = append(events, *event)
 	}
-	s.logger.Warn("no events were found")
-	return []storage.Event{}, nil
-
+	return events, nil
 }

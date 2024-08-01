@@ -1,0 +1,13 @@
+[logger]
+level = "info"
+path = "./storage/logs/app.log"
+
+[server]
+port = ":8080"
+
+[db]
+user = "calendar"
+password = "password"
+host = "postgres"
+port = 5432
+name = "calendar"

@@ -18,7 +18,7 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.yaml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
 }
 
 func main() {
@@ -31,17 +31,29 @@ func main() {
 
 	config, err := NewConfig(configFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("can't get config: %v", err)
 	}
-	logg := logger.NewLogger()
 
-	storage := memorystorage.New()
-	calendar := app.New(logg, storage)
+	logg, err := logger.New(config.Logger.Level, config.Logger.Path)
+	if err != nil {
+		log.Fatalf("can't start logger: %v", err)
+	}
 
-	server := internalhttp.NewServer(logg, calendar)
+	application := app.New(*logg, memorystorage.New(logg))
 
-	ctx, cancel := signal.NotifyContext(context.Background(),
-		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	server := internalhttp.NewServer(
+		*logg,
+		config.Server.Port,
+		*internalhttp.NewHandler(
+			*logg,
+			application,
+		),
+	)
+
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP,
+	)
 	defer cancel()
 
 	go func() {
@@ -54,8 +66,6 @@ func main() {
 			logg.Error("failed to stop http server: " + err.Error())
 		}
 	}()
-
-	logg.Info("calendar is running...")
 
 	if err := server.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())

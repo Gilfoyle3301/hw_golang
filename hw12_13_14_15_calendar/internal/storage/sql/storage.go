@@ -2,82 +2,94 @@ package sqlstorage
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/logger"
 	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/storage"
+	_ "github.com/jackc/pgx/v4/stdlib" //nolint
 	"github.com/jmoiron/sqlx"
 )
 
 type Storage struct {
-	logger *logger.Logger
-	DB     *sqlx.DB
+	db *sqlx.DB
 }
 
 func New() *Storage {
 	return &Storage{}
 }
 
-func (s *Storage) Connect(ctx context.Context, connectSchema string) error {
-	db, err := sqlx.ConnectContext(ctx, "postgres", connectSchema)
+func (s *Storage) Connect(ctx context.Context, dsn string) error {
+	db, err := sqlx.Open("pgx", dsn)
 	if err != nil {
-		s.logger.Error("failed connection database")
-		return fmt.Errorf("failed to connect to database: %w", err)
+		return err
 	}
-	s.DB = db
-	return db.Ping()
+
+	s.db = db
+
+	return s.db.Ping()
 }
 
-func (s *Storage) Close(ctx context.Context) error {
-	return s.DB.Close()
+func (s *Storage) Close(_ context.Context) error {
+	return s.db.Close()
 }
 
-func (s *Storage) AddEvent(ctx context.Context, event storage.Event) error {
-	_, err := s.DB.NamedExecContext(ctx, `INSERT INTO events (
-			id, 
-			title, 
-			description,
-			event_at,
-			start_at,
-			end_at,
-			notify_at,
-			is_notify 
-		) VALUE (
-			:id, 
-			:title, 
-			:description,
-			:event_at,
-			:start_at,
-			:end_at,
-			:notify_at,
-			:is_notify
-		)`, event)
+func (s *Storage) CreateEvent(ctx context.Context, e storage.Event) error {
+	_, err := s.db.NamedExecContext(ctx, `INSERT INTO events (
+                    id, 
+                    title, 
+                    description,
+                    event_at,
+                    start_at,
+                    end_at,
+                    notify_at,
+                    is_notify
+--                     user_id
+  		  ) VALUES (
+	     			:id, 
+                    :title, 
+                    :description,
+                    :event_at,
+                    :start_at,
+                    :end_at,
+                    :notify_at,
+                    :is_notify
+--                     :user_id
+)`, e)
+
 	return err
 }
 
-func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) error {
-	_, err := s.DB.ExecContext(ctx, `UPDATE events SET 
-		title = $2,
-		description = $3,
-		event_at = $4,
-		start_at = $5,
-		end_at = $6,
-		notify_at = $7,
-		is_notify = $8 WHERE id = $1`, event.ID, event.Title, event.Description, event.EventAt, event.StartAt, event.StartAt, event.StartAt, event.NotifyAt, event.IsNotify)
+func (s *Storage) UpdateEvent(ctx context.Context, e storage.Event) error {
+	_, err := s.db.ExecContext(ctx, `UPDATE events  
+			SET title = $2, 
+				description = $3,
+				event_at = $4,
+				start_at = $5,
+				end_at = $6,
+				notify_at = $7,
+				is_notify = $8
+			WHERE id = $1`,
+		e.ID, e.Title, e.Description, e.EventAt, e.StartAt, e.StartAt, e.StartAt, e.NotifyAt, e.IsNotify)
+
 	return err
 }
 
-func (s *Storage) DeleteEvent(ctx context.Context, event storage.Event) error {
-	_, err := s.DB.ExecContext(ctx, `DELETE FROM events WHERE id =  $1;`, event.ID)
+func (s *Storage) DeleteEvent(ctx context.Context, e storage.Event) error {
+	_, err := s.db.ExecContext(ctx, "DELETE FROM events WHERE id = $1", e.ID)
+
 	return err
 }
 
-func (s *Storage) ListEvents(ctx context.Context) (*[]storage.Event, error) {
-	listEvents := []storage.Event{}
-	query := `SELECT * FROM events`
-	err := s.DB.SelectContext(ctx, &listEvents, query)
+func (s *Storage) GetEvents(ctx context.Context) ([]storage.Event, error) {
+	event := storage.Event{}
+	events := []storage.Event{}
+
+	prepare, err := s.db.PrepareNamed(`SELECT * FROM events`)
 	if err != nil {
 		return nil, err
 	}
-	return &listEvents, nil
+	err = prepare.Select(&events, event)
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
 }

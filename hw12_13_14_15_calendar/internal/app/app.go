@@ -2,39 +2,66 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/logger"
 	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/storage"
 )
 
 type App struct { // TODO
-}
-
-type Logger interface {
-	Error(msg string)
-	Warn(msg string)
-	Info(msg string)
-	Debug(msg string)
+	logger  logger.Logger
+	storage Storage
 }
 
 type Storage interface {
-	AddEvent(storage.Event) error
-	UpdateEvent(storage.Event) error
-	DeleteEvent(storage.Event) error
-	ListEvents() (*[]storage.Event, error)
+	CreateEvent(context.Context, storage.Event) error
+	UpdateEvent(context.Context, storage.Event) error
+	DeleteEvent(context.Context, storage.Event) error
+	GetEvents(context.Context) ([]storage.Event, error)
 }
-
-// handler := &NewHandler{}
-// http.HandleFunc("/", handler.helloHandler)
 
 func New(logger logger.Logger, storage Storage) *App {
-	return &App{}
+	return &App{
+		logger,
+		storage,
+	}
 }
 
-func (a *App) CreateEvent(ctx context.Context, id, title string) error {
-	// TODO
+func (a *App) Index(ctx context.Context) map[string]string {
+	return map[string]string{"message": "hello world"}
+}
+
+func (a *App) CreateEvent(ctx context.Context, event storage.Event) error {
+	if err := a.storage.CreateEvent(ctx, event); err != nil {
+		a.logger.Error("cannot create event error")
+		return fmt.Errorf("cannot create event: %w", err)
+	}
+
 	return nil
-	// return a.storage.CreateEvent(storage.Event{ID: id, Title: title})
 }
 
-// TODO
+func (a *App) UpdateEvent(ctx context.Context, e storage.Event) error {
+	if err := a.storage.UpdateEvent(ctx, e); err != nil {
+		a.logger.Error("cannot update event error")
+		return fmt.Errorf("cannot update event: %w", err)
+	}
+	return nil
+}
+
+func (a *App) DeleteEvent(ctx context.Context, e storage.Event) error {
+	if err := a.storage.DeleteEvent(ctx, e); err != nil {
+		a.logger.Error("cannot delete event error")
+		return fmt.Errorf("cannot delete event: %w", err)
+	}
+	return nil
+}
+
+func (a *App) GetEvents(ctx context.Context) ([]storage.Event, error) {
+	events, err := a.storage.GetEvents(ctx)
+	if err != nil {
+		a.logger.Error("cannot get events error")
+		return nil, fmt.Errorf("cannot get events: %w", err)
+	}
+
+	return events, nil
+}

@@ -2,41 +2,40 @@ package main
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/go-yaml/yaml"
+	"github.com/BurntSushi/toml"
 )
+
+type Config struct {
+	Logger LoggerConf
+	DB     DBConf
+	Server ServerConf
+}
 
 type LoggerConf struct {
 	Level string
+	Path  string
 }
 
-type DbConf struct {
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	Host     string `yaml:"host"`
-	Port     uint64 `yaml:"port"`
-	Name     string `yaml:"name"`
-}
 type ServerConf struct {
-	Port string `yaml:"port"`
-}
-type Config struct {
-	Logger LoggerConf `yaml:"logger"`
-	Db     DbConf     `yaml:"db"`
-	Server ServerConf `yaml:"server"`
+	Port string
 }
 
-func NewConfig(configFilePath string) (*Config, error) {
-	var config Config
-	configReader, err := os.ReadFile(configFilePath)
-	if err != nil {
-		return nil, fmt.Errorf("reading conf file %s fail: %w", configFilePath, err)
+type DBConf struct {
+	User     string
+	Password string
+	Host     string
+	Port     uint64
+	Name     string
+}
+
+func NewConfig(path string) (Config, error) {
+	config := Config{}
+
+	if _, err := toml.DecodeFile(path, &config); err != nil {
+		fmt.Println(err)
+		return config, err
 	}
 
-	if err := yaml.Unmarshal(configReader, &config); err != nil {
-		return nil, fmt.Errorf("Unmarshal conf fail: %w", err)
-	}
-
-	return &config, nil
+	return config, nil
 }

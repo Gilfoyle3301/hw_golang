@@ -5,24 +5,28 @@ import (
 	"errors"
 	"net/http"
 	"time"
-
-	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/app"
 )
 
 type Server struct {
-	logger app.Logger
+	logger Logger
 	server *http.Server
 }
 
-func NewServer(logger app.Logger, address string, handler http.Handler) *Server {
+type Logger interface {
+	Debug(msg string)
+	Warn(msg string)
+	Info(msg string)
+	Error(msg string)
+}
+
+func NewServer(logger Logger, address string, handler Handler) *Server {
 	return &Server{
-		logger: logger,
-		server: &http.Server{
-			Addr:           address,
-			ReadTimeout:    10 * time.Second,
-			WriteTimeout:   10 * time.Second,
-			MaxHeaderBytes: 1 << 20,
-			Handler:        handler,
+		logger,
+		&http.Server{
+			Addr:         address,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 10 * time.Second,
+			Handler:      handler.Router(),
 		},
 	}
 }
@@ -33,14 +37,18 @@ func (s *Server) Start(ctx context.Context) error {
 			s.logger.Error(err.Error())
 		}
 	}()
+
 	<-ctx.Done()
+
 	return nil
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	s.logger.Error("Server stoped")
+	s.logger.Error("Server Shutdown.")
+
 	if err := s.server.Shutdown(ctx); err != nil {
-		s.logger.Error("shutdown error: " + err.Error())
+		s.logger.Error("Server Shutdown error:" + err.Error())
 	}
+
 	return nil
 }

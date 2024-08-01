@@ -1,28 +1,26 @@
 package internalhttp
 
 import (
-	"net/http"
-	"strconv"
+	"fmt"
 	"time"
 
-	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/app"
+	"github.com/gin-gonic/gin"
 )
 
-type wrapper struct {
-	http.ResponseWriter
-	statusCode int
-}
+func loggingMiddleware(logger Logger) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		t := time.Now()
+		c.Next()
 
-func loggingMiddleware(logger app.Logger) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			start := time.Now()
-			logger.Info("Incoming request: " + r.Method + " " + r.URL.Path)
-			wrapperWrite := &wrapper{ResponseWriter: w, statusCode: http.StatusOK}
-			next.ServeHTTP(wrapperWrite, r)
-			duration := time.Since(start)
-			logger.Info("Response: " + http.StatusText(wrapperWrite.statusCode) + "(" + strconv.Itoa(wrapperWrite.statusCode) + ")" + duration.String())
-		})
+		logger.Info(fmt.Sprintf(
+			"client ip: %v, latency: %v, status: %v, method: %v, protocol: %v, request: %v, user-agent: %v",
+			c.ClientIP(),
+			time.Since(t),
+			c.Writer.Status(),
+			c.Request.Method,
+			c.Request.Proto,
+			c.Request.RequestURI,
+			c.Request.UserAgent(),
+		))
 	}
-
 }
