@@ -1,3 +1,4 @@
+//nolint:depguard
 package app
 
 import (
@@ -8,7 +9,7 @@ import (
 	"github.com/Gilfoyle3301/hw_golang/hw12_13_14_15_calendar/internal/storage"
 )
 
-type App struct { // TODO
+type App struct {
 	logger  logger.Logger
 	storage Storage
 }
@@ -27,7 +28,7 @@ func New(logger logger.Logger, storage Storage) *App {
 	}
 }
 
-func (a *App) Index(ctx context.Context) map[string]string {
+func (a *App) Index() map[string]string {
 	return map[string]string{"message": "hello world"}
 }
 

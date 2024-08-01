@@ -1,3 +1,4 @@
+//nolint:depguard
 package sqlstorage
 
 import (
@@ -16,7 +17,7 @@ func New() *Storage {
 	return &Storage{}
 }
 
-func (s *Storage) Connect(ctx context.Context, dsn string) error {
+func (s *Storage) Connect(dsn string) error {
 	db, err := sqlx.Open("pgx", dsn)
 	if err != nil {
 		return err
@@ -78,7 +79,7 @@ func (s *Storage) DeleteEvent(ctx context.Context, e storage.Event) error {
 	return err
 }
 
-func (s *Storage) GetEvents(ctx context.Context) ([]storage.Event, error) {
+func (s *Storage) GetEvents() ([]storage.Event, error) {
 	event := storage.Event{}
 	events := []storage.Event{}
 
