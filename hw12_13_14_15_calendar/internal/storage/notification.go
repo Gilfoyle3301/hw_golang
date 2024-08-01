@@ -2,7 +2,8 @@ package storage
 
 import "time"
 
-/*Notification
+/*
+Notification
 ID события;
 Заголовок события;
 Дата события;
